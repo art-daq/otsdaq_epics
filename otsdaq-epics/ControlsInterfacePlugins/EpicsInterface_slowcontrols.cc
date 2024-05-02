@@ -283,6 +283,16 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 			printf("\n");
 			}*/
 			break;
+        case DBR_STSACK_STRING:
+            if(DEBUG)
+			{
+				__COUT__ << "Response Type: DBR_STSACK_STRING" << __E__;
+			}
+            //const std::string ackt_str = (pBuf->putackt ? "YES" : "NO");
+			((EpicsInterface*)eha.usr)
+			    ->writePVAlertToQueue(ca_name(eha.chid), epicsAlarmConditionStrings[pBuf->sstrval.status], epicsAlarmSeverityStrings[pBuf->sstrval.severity],
+                                                         (pBuf->putackt ? "YES" : "NO"), epicsAlarmSeverityStrings[pBuf->putacks]);
+            break;
 		case DBR_STS_SHORT:
 			if(DEBUG)
 			{
@@ -782,6 +792,7 @@ void EpicsInterface::subscribeToChannel(const std::string& pvName, chtype /*subs
 	                              this,
 	                              &(mapOfPVInfo_.find(pvName)->second->eventID)),
 	       "EpicsInterface::subscribeToChannel() : ca_create_subscription");
+
 	SEVCHK(ca_create_subscription(DBR_CTRL_DOUBLE,
 	                              1,
 	                              mapOfPVInfo_.find(pvName)->second->channelID,
@@ -917,15 +928,21 @@ void EpicsInterface::writePVValueToRecord(const std::string& pvName, const std::
 	return;
 }
 
-void EpicsInterface::writePVAlertToQueue(const std::string& pvName, const char* status, const char* severity)
+void EpicsInterface::writePVAlertToQueue(const std::string& pvName, const char* status, const char* severity,
+                                                                    const char* acks, const char* ackt)
 {
 	if(!checkIfPVExists(pvName))
 	{
 		__GEN_COUT__ << pvName << " doesn't exist!" << __E__;
 		return;
 	}
-	PVAlerts alert(time(0), status, severity);
-	mapOfPVInfo_.find(pvName)->second->alerts.push(alert);
+    if((ackt != nullptr)&&(acks != nullptr)) {
+        PVAlerts alert(time(0), status, severity, acks, ackt);
+        mapOfPVInfo_.find(pvName)->second->alerts.push(alert);
+    } else {
+	    PVAlerts alert(time(0), status, severity);
+        mapOfPVInfo_.find(pvName)->second->alerts.push(alert);
+    }
 	//__GEN_COUT__ << "writePVAlertToQueue(): " << pvName << " " << status << " "
 	//<< severity << __E__;
 

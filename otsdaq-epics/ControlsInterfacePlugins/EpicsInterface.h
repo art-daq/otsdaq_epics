@@ -55,9 +55,19 @@ struct PVAlerts
 		severity = d;
 		time     = t;
 	}
+    PVAlerts(time_t t, const char* c, const char* d, const char* at, const char* as)
+	{
+		status   = c;
+		severity = d;
+		time     = t;
+        ackt     = at;
+        acks     = as;
+	}
 	std::string status;
 	std::string severity;
 	time_t      time;
+    std::string ackt;
+    std::string acks;
 };
 
 struct PVInfo
@@ -162,7 +172,7 @@ class EpicsInterface : public SlowControlsVInterface
 	void 									writePVValueToRecord	(const std::string& pvName, const std::string& pdata);
 	//void writePVControlValueToRecord(std::string pvName, struct dbr_ctrl_char* pdata);
 	void 									writePVControlValueToRecord(const std::string& pvName, struct dbr_ctrl_double* pdata);
-	void 									writePVAlertToQueue		(const std::string& pvName, const char* status, const char* severity);
+	void 									writePVAlertToQueue		(const std::string& pvName, const char* status, const char* severity, const char* acks = nullptr, const char* ackt = nullptr);
 	void 									readPVRecord			(const std::string& pvName);
 	void 									debugConsole			(const std::string& pvName);
 	static void								eventCallback			(struct event_handler_args eha);
