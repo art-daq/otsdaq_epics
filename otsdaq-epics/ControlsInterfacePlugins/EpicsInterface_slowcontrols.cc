@@ -546,25 +546,18 @@ void EpicsInterface::loadListOfPVs()
 		std::string cluster = "Mu2e";
 
 		__GEN_COUT__ << "Reading database PVS List" << __E__;
-		/*int num =*/snprintf(buffer, sizeof(buffer), "SELECT COUNT(%s) FROM channel", std::string("channel_id").c_str());
+		snprintf(buffer, sizeof(buffer), "SELECT name FROM channel");
 		res = PQexec(dcsArchiveDbConn, buffer);
 
 		if(PQresultStatus(res) == PGRES_TUPLES_OK)
 		{
-			int rows = 0;
-			rows     = std::stoi(PQgetvalue(res, 0, 0));
-			PQclear(res);
-			for(int i = 1; i <= rows; i++)
+			for(int i = 0; i < PQntuples(res); i++)
 			{
-				/*int num =*/snprintf(buffer, sizeof(buffer), "SELECT name FROM channel WHERE channel_id = '%d'", i);
-				res = PQexec(dcsArchiveDbConn, buffer);
-				if(PQresultStatus(res) == PGRES_TUPLES_OK)
-				{
-					pv_name               = PQgetvalue(res, 0, 0);
+				pv_name  = PQgetvalue(res, i, 0);
+				if(!pv_name.empty())
 					mapOfPVInfo_[pv_name] = new PVInfo(DBR_STRING);
-				}
 				else
-					__GEN_COUT__ << "SELECT failed: mapOfPVInfo_ not filled for channel_id: " << i << PQerrorMessage(dcsArchiveDbConn) << __E__;
+					__GEN_COUT__ << "Empty pv name for position = " << i << __E__;
 			}
 			__GEN_COUT__ << "Finished reading database PVs List!" << __E__;
 			PQclear(res);
