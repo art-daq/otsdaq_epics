@@ -79,20 +79,20 @@ struct PVInfo
 	evid                 eventID      = NULL;
 	chtype               channelType;
 	std::string          pvValue;
-	int                  circularBufferSize    = 10;  // Default Guess
+	int                  circularBufferSize    = 10;  ///< Default Guess
 	unsigned int         mostRecentBufferIndex = -1;
 	std::vector<std::pair<time_t, std::string>>
-	     dataCache;           // (10, std::pair<time_t, std::string> (0, ""));
-	bool valueChange = true;  // so that it automatically reports the status when
-	                          // we open the viewer for the first time - get to see
-	                          // what is DC'd
+	     dataCache;           ///< (10, std::pair<time_t, std::string> (0, ""));
+	bool valueChange = true;  ///< so that it automatically reports the status when
+	                          ///< we open the viewer for the first time - get to see
+	                          ///< what is DC'd
 	std::queue<PVAlerts> alerts;
 	//struct dbr_ctrl_char settings;
 	struct dbr_ctrl_double settings;
 
 };
 
-//db connection
+///db connection
 PGconn *dcsArchiveDbConn;
 PGconn *dcsAlarmDbConn;
 PGconn *dcsLogDbConn;
@@ -146,10 +146,10 @@ class EpicsInterface : public SlowControlsVInterface
 	virtual void 							start					(std::string /*runNumber*/) override  { handleAlarmsForFSM("start",getSelfNode().getNode("LinkToStartAlarmsToMonitorTable")); }
 	virtual void 							stop					(void) override { handleAlarmsForFSM("stop",		getSelfNode().getNode("LinkToStopAlarmsToMonitorTable")); }
 
-	// States
+	/// States
 	virtual bool 							running					(void) override { handleAlarmsForFSM("running",		getSelfNode().getNode("LinkToRunningAlarmsToMonitorTable")); sleep(1); return true;}
-	//This is a workloop/thread, by default do nothing and end thread during running (Note: return true would repeat call)
-
+	///This is a workloop/thread, by default do nothing and end thread during running (Note: return true would repeat call)
+	///
   private:
 	bool 									checkIfPVExists			(const std::string& pvName);
 	void 									loadListOfPVs			(void);
