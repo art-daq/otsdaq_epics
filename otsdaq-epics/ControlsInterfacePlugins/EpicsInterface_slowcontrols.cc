@@ -9,15 +9,15 @@
 //#include "/mu2e/ups/epics/v3_15_4/Linux64bit+2.6-2.12-e10/include/alarm.h"
 //#include "alarmString.h"
 #include "cadef.h"  //EPICS Channel Access:
-// http://www.aps.anl.gov/epics/base/R3-14/12-docs/CAref.html
-// Example compile options:
-// Compiling:
-// Setup epics (See redmine wiki)
-// g++ -std=c++11  EpicsCAMonitor.cpp EpicsCAMessage.cpp EpicsWebClient.cpp
-// SocketUDP.cpp SocketTCP.cpp -L$EPICS_BASE/lib/linux-x86_64/
-// -Wl,-rpath,$EPICS_BASE/lib/linux-x86_64 -lca -lCom -I$EPICS_BASE//include
-// -I$EPICS_BASE//include/os/Linux -I$EPICS_BASE/include/compiler/gcc -o
-// EpicsWebClient
+/// http://www.aps.anl.gov/epics/base/R3-14/12-docs/CAref.html
+/// Example compile options:
+/// Compiling:
+/// Setup epics (See redmine wiki)
+/// g++ -std=c++11  EpicsCAMonitor.cpp EpicsCAMessage.cpp EpicsWebClient.cpp
+/// SocketUDP.cpp SocketTCP.cpp -L$EPICS_BASE/lib/linux-x86_64/
+/// -Wl,-rpath,$EPICS_BASE/lib/linux-x86_64 -lca -lCom -I$EPICS_BASE//include
+/// -I$EPICS_BASE//include/os/Linux -I$EPICS_BASE/include/compiler/gcc -o
+/// EpicsWebClient
 #pragma GCC diagnostic pop
 
 // clang-format off
@@ -218,10 +218,10 @@ void EpicsInterface::unsubscribe(const std::string& pvName)
 	return;
 }
 
-//------------------------------------------------------------------------------------------------------------
-//--------------------------------------PRIVATE
-// FUNCTION--------------------------------------
-//------------------------------------------------------------------------------------------------------------
+///------------------------------------------------------------------------------------------------------------
+///--------------------------------------PRIVATE
+/// FUNCTION--------------------------------------
+///------------------------------------------------------------------------------------------------------------
 void EpicsInterface::eventCallback(struct event_handler_args eha)
 {
 	// chid chid = eha.chid;
@@ -872,7 +872,7 @@ void EpicsInterface::writePVControlValueToRecord(const std::string& pvName,
 	return;
 }
 
-// Enforces the circular buffer
+/// Enforces the circular buffer
 void EpicsInterface::writePVValueToRecord(const std::string& pvName, const std::string& pdata)
 {
 	std::pair<time_t, std::string> currentRecord(time(0), pdata);
@@ -1546,12 +1546,12 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(const std::st
 }  // end getAlarmsLog()
 
 //========================================================================================================================
-// Check Alarms from Epics
-//	returns empty vector if no alarm status
-//
-//	Possible severity values = {NO_ALARM, INVALID, MINOR, MAJOR}
-//	Note: Archiver also has "NONE" and "OK" but should not be a current
-// value
+/// Check Alarms from Epics
+///	returns empty vector if no alarm status
+///
+///	Possible severity values = {NO_ALARM, INVALID, MINOR, MAJOR}
+///	Note: Archiver also has "NONE" and "OK" but should not be a current
+/// value
 std::vector<std::string> EpicsInterface::checkAlarm(const std::string& pvName, bool ignoreMinor /*=false*/)
 {
 	__COUT__ << "checkAlarm()" << __E__;
@@ -1582,7 +1582,7 @@ std::vector<std::string> EpicsInterface::checkAlarm(const std::string& pvName, b
 }  // end checkAlarm()
 
 //========================================================================================================================
-// Check Alarms from Epics
+/// Check Alarms from Epics
 std::vector<std::vector<std::string>> EpicsInterface::checkAlarmNotifications()
 {
 	std::vector<std::vector<std::string>> alarmReturn;
@@ -1636,7 +1636,7 @@ std::vector<std::vector<std::string>> EpicsInterface::checkAlarmNotifications()
 }  // end checkAlarmNotifications()
 
 //========================================================================================================================
-// handle Alarms For FSM from Epics
+/// handle Alarms For FSM from Epics
 void EpicsInterface::handleAlarmsForFSM(const std::string& fsmTransitionName, ConfigurationTree linkToAlarmsToMonitor)
 {
 	if(!linkToAlarmsToMonitor.isDisconnected())
@@ -1677,7 +1677,7 @@ void EpicsInterface::handleAlarmsForFSM(const std::string& fsmTransitionName, Co
 }  // end handleAlarmsForFSM()
 
 //========================================================================================================================
-// Configure override for Epics
+/// Configure override for Epics
 void EpicsInterface::configure()
 {
 
