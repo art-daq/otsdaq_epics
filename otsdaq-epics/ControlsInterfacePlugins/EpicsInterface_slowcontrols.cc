@@ -35,16 +35,16 @@ const std::string EpicsInterface::EPICS_MAJOR_ALARM 	= "MAJOR";
 // clang-format on
 
 EpicsInterface::EpicsInterface(const std::string&       pluginType,
-							   const std::string&       interfaceUID,
-							   const ConfigurationTree& theXDAQContextConfigTree,
-							   const std::string&       controlsConfigurationPath)
-	: SlowControlsVInterface(
-		  pluginType, interfaceUID, theXDAQContextConfigTree, controlsConfigurationPath)
+                               const std::string&       interfaceUID,
+                               const ConfigurationTree& theXDAQContextConfigTree,
+                               const std::string&       controlsConfigurationPath)
+    : SlowControlsVInterface(
+          pluginType, interfaceUID, theXDAQContextConfigTree, controlsConfigurationPath)
 {
 	// this allows for handlers to happen "asynchronously"
 	SEVCHK(ca_context_create(ca_enable_preemptive_callback),
-		   "EpicsInterface::EpicsInterface() : "
-		   "ca_enable_preemptive_callback_init()");
+	       "EpicsInterface::EpicsInterface() : "
+	       "ca_enable_preemptive_callback_init()");
 }
 
 EpicsInterface::~EpicsInterface() { destroy(); }
@@ -105,7 +105,7 @@ std::string EpicsInterface::getList(const std::string& format)
 	if(format == "JSON")
 	{
 		__GEN_COUT__ << "Getting list in JSON format! There are " << mapOfPVInfo_.size()
-					 << " pv's.";
+		             << " pv's.";
 		if(mapOfPVInfo_.size() == 0 && loginErrorMsg_ != "")
 		{
 			__GEN_SS__ << "No PVs found and error message: " << loginErrorMsg_ << __E__;
@@ -120,10 +120,10 @@ std::string EpicsInterface::getList(const std::string& format)
 			{
 				res = PQexec(dcsArchiveDbConn, buffer);
 				/*int num = */ snprintf(
-					buffer,
-					sizeof(buffer),
-					"SELECT smpl_mode_id, smpl_per FROM channel WHERE name = '%s'",
-					(it->first).c_str());
+				    buffer,
+				    sizeof(buffer),
+				    "SELECT smpl_mode_id, smpl_per FROM channel WHERE name = '%s'",
+				    (it->first).c_str());
 
 				if(PQresultStatus(res) == PGRES_TUPLES_OK)
 				{
@@ -139,13 +139,13 @@ std::string EpicsInterface::getList(const std::string& format)
 						refreshRate = PQgetvalue(res, 0, 1);
 					PQclear(res);
 					__GEN_COUT__
-						<< "getList() \"sample rate\" SELECT result: " << it->first << ":"
-						<< refreshRate << " (smpl_mode_id = " << smplMode << ")" << __E__;
+					    << "getList() \"sample rate\" SELECT result: " << it->first << ":"
+					    << refreshRate << " (smpl_mode_id = " << smplMode << ")" << __E__;
 				}
 				else
 				{
 					__GEN_COUT__ << "SELECT failed: " << PQerrorMessage(dcsArchiveDbConn)
-								 << __E__;
+					             << __E__;
 					PQclear(res);
 				}
 			}
@@ -184,14 +184,14 @@ void EpicsInterface::subscribeJSON(const std::string& JSONNameString)
 	std::string JSON = "{\"PVList\" :";
 	std::string pvName;
 	std::string pvList = JSONNameString;  // FIXME -- someday fix parsing to not do
-										  // so many copies/substr
+	                                      // so many copies/substr
 	if(pvList.find(JSON) != std::string::npos)
 	{
 		pvList = pvList.substr(pvList.find(JSON) + JSON.length(), std::string::npos);
 		do
 		{
 			pvList = pvList.substr(pvList.find("\"") + 1,
-								   std::string::npos);     // eliminate up to the next "
+			                       std::string::npos);     // eliminate up to the next "
 			pvName = pvList.substr(0, pvList.find("\""));  //
 			// if(DEBUG){__GEN_COUT__ << "Read PV Name:  " << pvName << __E__;}
 			pvList = pvList.substr(pvList.find("\"") + 1, std::string::npos);
@@ -201,7 +201,7 @@ void EpicsInterface::subscribeJSON(const std::string& JSONNameString)
 			{
 				createChannel(pvName);
 				subscribeToChannel(pvName,
-								   mapOfPVInfo_.find(pvName)->second->channelType);
+				                   mapOfPVInfo_.find(pvName)->second->channelType);
 				SEVCHK(ca_poll(), "EpicsInterface::subscribeJSON : ca_poll");
 			}
 			else if(DEBUG)
@@ -263,10 +263,10 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_CTRL_DOUBLE" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVControlValueToRecord(
-					ca_name(eha.chid),
-					((struct dbr_ctrl_double*)
-						 eha.dbr));  // write the PV's control values to records
+			    ->writePVControlValueToRecord(
+			        ca_name(eha.chid),
+			        ((struct dbr_ctrl_double*)
+			             eha.dbr));  // write the PV's control values to records
 			break;
 		case DBR_DOUBLE:
 			if(DEBUG)
@@ -274,10 +274,10 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_DOUBLE" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVValueToRecord(
-					ca_name(eha.chid),
-					std::to_string(
-						*((double*)eha.dbr)));  // write the PV's value to records
+			    ->writePVValueToRecord(
+			        ca_name(eha.chid),
+			        std::to_string(
+			            *((double*)eha.dbr)));  // write the PV's value to records
 			break;
 		case DBR_STS_STRING:
 			if(DEBUG)
@@ -285,9 +285,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_STRING" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->sstrval.status],
-									  epicsAlarmSeverityStrings[pBuf->sstrval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->sstrval.status],
+			                          epicsAlarmSeverityStrings[pBuf->sstrval.severity]);
 			/*if(DEBUG)
 			{
 			printf("current %s:\n", eha.count > 1?"values":"value");
@@ -305,9 +305,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_SHORT" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->sshrtval.status],
-									  epicsAlarmSeverityStrings[pBuf->sshrtval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->sshrtval.status],
+			                          epicsAlarmSeverityStrings[pBuf->sshrtval.severity]);
 			/*if(DEBUG)
 	  {
 	  printf("current %s:\n", eha.count > 1?"values":"value");
@@ -324,9 +324,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_FLOAT" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->sfltval.status],
-									  epicsAlarmSeverityStrings[pBuf->sfltval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->sfltval.status],
+			                          epicsAlarmSeverityStrings[pBuf->sfltval.severity]);
 			/*if(DEBUG)
 	  {
 	  printf("current %s:\n", eha.count > 1?"values":"value");
@@ -343,9 +343,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_ENUM" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->senmval.status],
-									  epicsAlarmSeverityStrings[pBuf->senmval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->senmval.status],
+			                          epicsAlarmSeverityStrings[pBuf->senmval.severity]);
 			/*if(DEBUG)
 	  {
 			printf("current %s:\n", eha.count > 1?"values":"value");
@@ -361,9 +361,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_CHAR" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->schrval.status],
-									  epicsAlarmSeverityStrings[pBuf->schrval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->schrval.status],
+			                          epicsAlarmSeverityStrings[pBuf->schrval.severity]);
 			/*if(DEBUG)
 	  {
 			printf("current %s:\n", eha.count > 1?"values":"value");
@@ -380,9 +380,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_LONG" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->slngval.status],
-									  epicsAlarmSeverityStrings[pBuf->slngval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->slngval.status],
+			                          epicsAlarmSeverityStrings[pBuf->slngval.severity]);
 			/*if(DEBUG)
 	  {
 			printf("current %s:\n", eha.count > 1?"values":"value");
@@ -399,9 +399,9 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				__COUT__ << "Response Type: DBR_STS_DOUBLE" << __E__;
 			}
 			((EpicsInterface*)eha.usr)
-				->writePVAlertToQueue(ca_name(eha.chid),
-									  epicsAlarmConditionStrings[pBuf->sdblval.status],
-									  epicsAlarmSeverityStrings[pBuf->sdblval.severity]);
+			    ->writePVAlertToQueue(ca_name(eha.chid),
+			                          epicsAlarmConditionStrings[pBuf->sdblval.status],
+			                          epicsAlarmSeverityStrings[pBuf->sdblval.severity]);
 			/*if(DEBUG)
 	  {
 			printf("current %s:\n", eha.count > 1?"values":"value");
@@ -417,13 +417,13 @@ void EpicsInterface::eventCallback(struct event_handler_args eha)
 				if(DEBUG)
 				{
 					__COUT__ << " EpicsInterface::eventCallback: PV Name = "
-							 << ca_name(eha.chid) << __E__;
+					         << ca_name(eha.chid) << __E__;
 					__COUT__ << (char*)eha.dbr << __E__;
 				}
 				((EpicsInterface*)eha.usr)
-					->writePVValueToRecord(
-						ca_name(eha.chid),
-						(char*)eha.dbr);  // write the PV's value to records
+				    ->writePVValueToRecord(
+				        ca_name(eha.chid),
+				        (char*)eha.dbr);  // write the PV's value to records
 			}
 			break;
 		}
@@ -442,7 +442,7 @@ void EpicsInterface::eventCallbackAlarm(struct event_handler_args eha)
 	if(eha.status == ECA_NORMAL)
 	{
 		__COUT__ << " EpicsInterface::eventCallbackAlarm: PV Name = " << ca_name(eha.chid)
-				 << __E__;
+		         << __E__;
 		if(((EpicsInterface*)eha.usr)->newAlarmCallback_ != nullptr)
 			((EpicsInterface*)eha.usr)->newAlarmCallback_();
 	}
@@ -483,7 +483,7 @@ bool EpicsInterface::checkIfPVExists(const std::string& pvName)
 	if(DEBUG)
 	{
 		__GEN_COUT__ << "EpicsInterface::checkIfPVExists(): PV Info Map Length is "
-					 << mapOfPVInfo_.size() << __E__;
+		             << mapOfPVInfo_.size() << __E__;
 	}
 
 	if(mapOfPVInfo_.find(pvName) != mapOfPVInfo_.end())
@@ -600,7 +600,7 @@ void EpicsInterface::loadListOfPVs()
 		else
 		{
 			__GEN_COUT__ << "SELECT failed: " << PQerrorMessage(dcsArchiveDbConn)
-						 << __E__;
+			             << __E__;
 			PQclear(res);
 		}
 	}
@@ -624,7 +624,7 @@ void EpicsInterface::loadListOfPVs()
 
 	__GEN_COUT__ << "Finished reading file and subscribing to pvs!" << __E__;
 	SEVCHK(ca_pend_event(0.0),
-		   "EpicsInterface::subscribe() : ca_pend_event(0.0)");  // Start listening
+	       "EpicsInterface::subscribe() : ca_pend_event(0.0)");  // Start listening
 
 	return;
 }
@@ -642,13 +642,13 @@ void EpicsInterface::getControlValues(const std::string& pvName)
 	}
 
 	SEVCHK(ca_array_get_callback(
-			   // DBR_CTRL_CHAR,
-			   DBR_CTRL_DOUBLE,
-			   0,
-			   mapOfPVInfo_.find(pvName)->second->channelID,
-			   eventCallback,
-			   this),
-		   "ca_array_get_callback");
+	           // DBR_CTRL_CHAR,
+	           DBR_CTRL_DOUBLE,
+	           0,
+	           mapOfPVInfo_.find(pvName)->second->channelID,
+	           eventCallback,
+	           this),
+	       "ca_array_get_callback");
 	// SEVCHK(ca_poll(), "EpicsInterface::getControlValues() : ca_poll");
 	return;
 }
@@ -661,14 +661,14 @@ void EpicsInterface::createChannel(const std::string& pvName)
 		return;
 	}
 	__GEN_COUT__ << "Trying to create channel to " << pvName << ":"
-				 << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
+	             << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
 
 	if(mapOfPVInfo_.find(pvName)->second != NULL)  // Check to see if the pvName
-												   // maps to a null pointer so we
-												   // don't have any errors
+	                                               // maps to a null pointer so we
+	                                               // don't have any errors
 		if(mapOfPVInfo_.find(pvName)->second->channelID !=
 		   NULL)  // channel might exist, subscription doesn't so create a
-				  // subscription
+		    // subscription
 		{
 			// if state of channel is connected then done, use it
 			if(ca_state(mapOfPVInfo_.find(pvName)->second->channelID) == cs_conn)
@@ -676,16 +676,16 @@ void EpicsInterface::createChannel(const std::string& pvName)
 				if(DEBUG)
 				{
 					__GEN_COUT__ << "Channel to " << pvName << " already exists!"
-								 << __E__;
+					             << __E__;
 				}
 				return;
 			}
 			if(DEBUG)
 			{
 				__GEN_COUT__
-					<< "Channel to " << pvName
-					<< " exists, but is not connected! Destroying current channel."
-					<< __E__;
+				    << "Channel to " << pvName
+				    << " exists, but is not connected! Destroying current channel."
+				    << __E__;
 			}
 			destroyChannel(pvName);
 		}
@@ -694,22 +694,22 @@ void EpicsInterface::createChannel(const std::string& pvName)
 	if(mapOfPVInfo_.find(pvName)->second->parameterPtr == NULL)
 	{
 		mapOfPVInfo_.find(pvName)->second->parameterPtr =
-			new PVHandlerParameters(pvName, this);
+		    new PVHandlerParameters(pvName, this);
 	}
 
 	// at this point, make a new channel
 	SEVCHK(ca_create_channel(pvName.c_str(),
-							 staticChannelCallbackHandler,
-							 mapOfPVInfo_.find(pvName)->second->parameterPtr,
-							 0,
-							 &(mapOfPVInfo_.find(pvName)->second->channelID)),
-		   "EpicsInterface::createChannel() : ca_create_channel");
+	                         staticChannelCallbackHandler,
+	                         mapOfPVInfo_.find(pvName)->second->parameterPtr,
+	                         0,
+	                         &(mapOfPVInfo_.find(pvName)->second->channelID)),
+	       "EpicsInterface::createChannel() : ca_create_channel");
 	__GEN_COUT__ << "channelID: " << pvName
-				 << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
+	             << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
 
 	SEVCHK(ca_replace_access_rights_event(mapOfPVInfo_.find(pvName)->second->channelID,
-										  accessRightsCallback),
-		   "EpicsInterface::createChannel() : ca_replace_access_rights_event");
+	                                      accessRightsCallback),
+	       "EpicsInterface::createChannel() : ca_replace_access_rights_event");
 	// SEVCHK(ca_poll(), "EpicsInterface::createChannel() : ca_poll"); //This
 	// routine will perform outstanding channel access background activity and then
 	// return.
@@ -756,14 +756,14 @@ void EpicsInterface::printChidInfo(chid chid, const std::string& message)
 {
 	__COUT__ << message.c_str() << __E__;
 	__COUT__ << "pv: " << ca_name(chid) << " type(" << ca_field_type(chid)
-			 << ") nelements(" << ca_element_count(chid) << ") host("
-			 << ca_host_name(chid) << ")" << __E__;
+	         << ") nelements(" << ca_element_count(chid) << ") host("
+	         << ca_host_name(chid) << ")" << __E__;
 	__COUT__ << "read(" << ca_read_access(chid) << ") write(" << ca_write_access(chid)
-			 << ") state(" << ca_state(chid) << ")" << __E__;
+	         << ") state(" << ca_state(chid) << ")" << __E__;
 }
 
 void EpicsInterface::subscribeToChannel(const std::string& pvName,
-										chtype /*subscriptionType*/)
+                                        chtype /*subscriptionType*/)
 {
 	if(!checkIfPVExists(pvName))
 	{
@@ -773,12 +773,12 @@ void EpicsInterface::subscribeToChannel(const std::string& pvName,
 	if(DEBUG)
 	{
 		__GEN_COUT__ << "Trying to subscribe to " << pvName << ":"
-					 << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
+		             << mapOfPVInfo_.find(pvName)->second->channelID << __E__;
 	}
 
 	if(mapOfPVInfo_.find(pvName)->second != NULL)  // Check to see if the pvName
-												   // maps to a null pointer so we
-												   // don't have any errors
+	                                               // maps to a null pointer so we
+	                                               // don't have any errors
 	{
 		if(mapOfPVInfo_.find(pvName)->second->eventID !=
 		   NULL)  // subscription already exists
@@ -800,48 +800,48 @@ void EpicsInterface::subscribeToChannel(const std::string& pvName,
 	// pvName);}
 
 	SEVCHK(ca_create_subscription(
-			   dbf_type_to_DBR(mapOfPVInfo_.find(pvName)->second->channelType),
-			   1,
-			   mapOfPVInfo_.find(pvName)->second->channelID,
-			   DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
-			   eventCallback,
-			   this,
-			   &(mapOfPVInfo_.find(pvName)->second->eventID)),
-		   "EpicsInterface::subscribeToChannel() : ca_create_subscription "
-		   "dbf_type_to_DBR");
+	           dbf_type_to_DBR(mapOfPVInfo_.find(pvName)->second->channelType),
+	           1,
+	           mapOfPVInfo_.find(pvName)->second->channelID,
+	           DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
+	           eventCallback,
+	           this,
+	           &(mapOfPVInfo_.find(pvName)->second->eventID)),
+	       "EpicsInterface::subscribeToChannel() : ca_create_subscription "
+	       "dbf_type_to_DBR");
 
 	SEVCHK(ca_create_subscription(DBR_STS_DOUBLE,
-								  1,
-								  mapOfPVInfo_.find(pvName)->second->channelID,
-								  DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
-								  eventCallback,
-								  this,
-								  &(mapOfPVInfo_.find(pvName)->second->eventID)),
-		   "EpicsInterface::subscribeToChannel() : ca_create_subscription "
-		   "DBR_STS_DOUBLE");
+	                              1,
+	                              mapOfPVInfo_.find(pvName)->second->channelID,
+	                              DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
+	                              eventCallback,
+	                              this,
+	                              &(mapOfPVInfo_.find(pvName)->second->eventID)),
+	       "EpicsInterface::subscribeToChannel() : ca_create_subscription "
+	       "DBR_STS_DOUBLE");
 
 	SEVCHK(ca_create_subscription(DBR_CTRL_DOUBLE,
-								  1,
-								  mapOfPVInfo_.find(pvName)->second->channelID,
-								  DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
-								  eventCallback,
-								  this,
-								  &(mapOfPVInfo_.find(pvName)->second->eventID)),
-		   "EpicsInterface::subscribeToChannel() : ca_create_subscription");
+	                              1,
+	                              mapOfPVInfo_.find(pvName)->second->channelID,
+	                              DBE_VALUE | DBE_ALARM | DBE_PROPERTY,
+	                              eventCallback,
+	                              this,
+	                              &(mapOfPVInfo_.find(pvName)->second->eventID)),
+	       "EpicsInterface::subscribeToChannel() : ca_create_subscription");
 	SEVCHK(ca_create_subscription(DBR_CTRL_DOUBLE,
-								  1,
-								  mapOfPVInfo_.find(pvName)->second->channelID,
-								  DBE_ALARM,
-								  eventCallbackAlarm,
-								  this,
-								  &(mapOfPVInfo_.find(pvName)->second->eventID)),
-		   "EpicsInterface::subscribeToChannel() : ca_create_subscription");
+	                              1,
+	                              mapOfPVInfo_.find(pvName)->second->channelID,
+	                              DBE_ALARM,
+	                              eventCallbackAlarm,
+	                              this,
+	                              &(mapOfPVInfo_.find(pvName)->second->eventID)),
+	       "EpicsInterface::subscribeToChannel() : ca_create_subscription");
 
 	if(DEBUG)
 	{
 		__GEN_COUT__ << "EpicsInterface::subscribeToChannel: Created Subscription to "
-					 << mapOfPVInfo_.find(pvName)->first << "!\n"
-					 << __E__;
+		             << mapOfPVInfo_.find(pvName)->first << "!\n"
+		             << __E__;
 	}
 	// SEVCHK(ca_poll(), "EpicsInterface::subscribeToChannel() : ca_poll");
 	return;
@@ -854,8 +854,8 @@ void EpicsInterface::cancelSubscriptionToChannel(const std::string& pvName)
 		{
 			status_ = ca_clear_subscription(mapOfPVInfo_.find(pvName)->second->eventID);
 			SEVCHK(status_,
-				   "EpicsInterface::cancelSubscriptionToChannel() : "
-				   "ca_clear_subscription");
+			       "EpicsInterface::cancelSubscriptionToChannel() : "
+			       "ca_clear_subscription");
 			if(status_ == ECA_NORMAL)
 			{
 				mapOfPVInfo_.find(pvName)->second->eventID = NULL;
@@ -891,10 +891,10 @@ void EpicsInterface::readValueFromPV(const std::string& /*pvName*/)
 }
 
 void EpicsInterface::writePVControlValueToRecord(
-	const std::string& pvName,
-	//                                                 struct dbr_ctrl_char*
-	//                                                 pdata)
-	struct dbr_ctrl_double* pdata)
+    const std::string& pvName,
+    //                                                 struct dbr_ctrl_char*
+    //                                                 pdata)
+    struct dbr_ctrl_double* pdata)
 {
 	if(DEBUG)
 	{
@@ -930,7 +930,7 @@ void EpicsInterface::writePVControlValueToRecord(
 
 /// Enforces the circular buffer
 void EpicsInterface::writePVValueToRecord(const std::string& pvName,
-										  const std::string& pdata)
+                                          const std::string& pdata)
 {
 	std::pair<time_t, std::string> currentRecord(time(0), pdata);
 
@@ -969,8 +969,8 @@ void EpicsInterface::writePVValueToRecord(const std::string& pvName,
 }
 
 void EpicsInterface::writePVAlertToQueue(const std::string& pvName,
-										 const char*        status,
-										 const char*        severity)
+                                         const char*        status,
+                                         const char*        severity)
 {
 	if(!checkIfPVExists(pvName))
 	{
@@ -990,11 +990,11 @@ void EpicsInterface::writePVAlertToQueue(const std::string& pvName,
 void EpicsInterface::readPVRecord(const std::string& pvName)
 {
 	status_ = ca_array_get_callback(
-		dbf_type_to_DBR_STS(mapOfPVInfo_.find(pvName)->second->channelType),
-		ca_element_count(mapOfPVInfo_.find(pvName)->second->channelID),
-		mapOfPVInfo_.find(pvName)->second->channelID,
-		eventCallback,
-		this);
+	    dbf_type_to_DBR_STS(mapOfPVInfo_.find(pvName)->second->channelType),
+	    ca_element_count(mapOfPVInfo_.find(pvName)->second->channelID),
+	    mapOfPVInfo_.find(pvName)->second->channelID,
+	    eventCallback,
+	    this);
 	SEVCHK(status_, "EpicsInterface::readPVRecord(): ca_array_get_callback");
 	return;
 }
@@ -1002,39 +1002,39 @@ void EpicsInterface::readPVRecord(const std::string& pvName)
 void EpicsInterface::debugConsole(const std::string& pvName)
 {
 	__GEN_COUT__ << "==============================================================="
-					"==============="
-				 << __E__;
+	                "==============="
+	             << __E__;
 	for(unsigned int it = 0; it < mapOfPVInfo_.find(pvName)->second->dataCache.size() - 1;
-		it++)
+	    it++)
 	{
 		if(it == mapOfPVInfo_.find(pvName)->second->mostRecentBufferIndex)
 		{
 			__GEN_COUT__ << "-----------------------------------------------------------"
-							"----------"
-						 << __E__;
+			                "----------"
+			             << __E__;
 		}
 		__GEN_COUT__ << "Iteration: " << it << " | "
-					 << mapOfPVInfo_.find(pvName)->second->mostRecentBufferIndex << " | "
-					 << mapOfPVInfo_.find(pvName)->second->dataCache[it].second << __E__;
+		             << mapOfPVInfo_.find(pvName)->second->mostRecentBufferIndex << " | "
+		             << mapOfPVInfo_.find(pvName)->second->dataCache[it].second << __E__;
 		if(it == mapOfPVInfo_.find(pvName)->second->mostRecentBufferIndex)
 		{
 			__GEN_COUT__ << "-----------------------------------------------------------"
-							"----------"
-						 << __E__;
+			                "----------"
+			             << __E__;
 		}
 	}
 	__GEN_COUT__ << "==============================================================="
-					"==============="
-				 << __E__;
+	                "==============="
+	             << __E__;
 	__GEN_COUT__ << "Status:     "
-				 << " | " << mapOfPVInfo_.find(pvName)->second->alerts.size() << " | "
-				 << mapOfPVInfo_.find(pvName)->second->alerts.front().status << __E__;
+	             << " | " << mapOfPVInfo_.find(pvName)->second->alerts.size() << " | "
+	             << mapOfPVInfo_.find(pvName)->second->alerts.front().status << __E__;
 	__GEN_COUT__ << "Severity:   "
-				 << " | " << mapOfPVInfo_.find(pvName)->second->alerts.size() << " | "
-				 << mapOfPVInfo_.find(pvName)->second->alerts.front().severity << __E__;
+	             << " | " << mapOfPVInfo_.find(pvName)->second->alerts.size() << " | "
+	             << mapOfPVInfo_.find(pvName)->second->alerts.front().severity << __E__;
 	__GEN_COUT__ << "==============================================================="
-					"==============="
-				 << __E__;
+	                "==============="
+	             << __E__;
 
 	return;
 }
@@ -1138,16 +1138,16 @@ std::array<std::string, 9> EpicsInterface::getSettings(const std::string& pvName
 	if(mapOfPVInfo_.find(pvName) != mapOfPVInfo_.end())
 	{
 		std::string units = "DC'd", upperDisplayLimit = "DC'd",
-					lowerDisplayLimit = "DC'd", upperAlarmLimit = "DC'd",
-					upperWarningLimit = "DC'd", lowerWarningLimit = "DC'd",
-					lowerAlarmLimit = "DC'd", upperControlLimit = "DC'd",
-					lowerControlLimit = "DC'd";
+		            lowerDisplayLimit = "DC'd", upperAlarmLimit = "DC'd",
+		            upperWarningLimit = "DC'd", lowerWarningLimit = "DC'd",
+		            lowerAlarmLimit = "DC'd", upperControlLimit = "DC'd",
+		            lowerControlLimit = "DC'd";
 		if(mapOfPVInfo_.find(pvName)->second != NULL)  // Check to see if the pvName
-													   // maps to a null pointer so
-													   // we don't have any errors
+		                                               // maps to a null pointer so
+		                                               // we don't have any errors
 			if(mapOfPVInfo_.find(pvName)->second->channelID !=
 			   NULL)  // channel might exist, subscription doesn't so create a
-					  // subscription
+			    // subscription
 			{
 				// dbr_ctrl_char* set = &mapOfPVInfo_.find(pvName)->second->settings;
 				dbr_ctrl_double* set = &mapOfPVInfo_.find(pvName)->second->settings;
@@ -1175,14 +1175,14 @@ std::array<std::string, 9> EpicsInterface::getSettings(const std::string& pvName
 			}
 
 		std::array<std::string, 9> s = {units,
-										upperDisplayLimit,
-										lowerDisplayLimit,
-										upperAlarmLimit,
-										upperWarningLimit,
-										lowerWarningLimit,
-										lowerAlarmLimit,
-										upperControlLimit,
-										lowerControlLimit};
+		                                upperDisplayLimit,
+		                                lowerDisplayLimit,
+		                                upperAlarmLimit,
+		                                upperWarningLimit,
+		                                lowerWarningLimit,
+		                                lowerAlarmLimit,
+		                                upperControlLimit,
+		                                lowerControlLimit};
 
 		return s;
 	}
@@ -1193,7 +1193,7 @@ std::array<std::string, 9> EpicsInterface::getSettings(const std::string& pvName
 		subscribe(pvName);
 	}
 	std::array<std::string, 9> s = {
-		"DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd"};
+	    "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd", "DC'd"};
 	return s;
 }
 
@@ -1205,26 +1205,26 @@ void EpicsInterface::dbSystemLogin()
 	dcsLogDbConnStatus_     = 0;
 
 	char* dbname_ = const_cast<char*>(
-		getenv("DCS_ARCHIVE_DATABASE") ? getenv("DCS_ARCHIVE_DATABASE") : "dcs_archive");
+	    getenv("DCS_ARCHIVE_DATABASE") ? getenv("DCS_ARCHIVE_DATABASE") : "dcs_archive");
 	char* dbhost_ = const_cast<char*>(
-		getenv("DCS_ARCHIVE_DATABASE_HOST") ? getenv("DCS_ARCHIVE_DATABASE_HOST") : "");
+	    getenv("DCS_ARCHIVE_DATABASE_HOST") ? getenv("DCS_ARCHIVE_DATABASE_HOST") : "");
 	char* dbport_ = const_cast<char*>(
-		getenv("DCS_ARCHIVE_DATABASE_PORT") ? getenv("DCS_ARCHIVE_DATABASE_PORT") : "");
+	    getenv("DCS_ARCHIVE_DATABASE_PORT") ? getenv("DCS_ARCHIVE_DATABASE_PORT") : "");
 	char* dbuser_ = const_cast<char*>(
-		getenv("DCS_ARCHIVE_DATABASE_USER") ? getenv("DCS_ARCHIVE_DATABASE_USER") : "");
+	    getenv("DCS_ARCHIVE_DATABASE_USER") ? getenv("DCS_ARCHIVE_DATABASE_USER") : "");
 	char* dbpwd_ = const_cast<char*>(
-		getenv("DCS_ARCHIVE_DATABASE_PWD") ? getenv("DCS_ARCHIVE_DATABASE_PWD") : "");
+	    getenv("DCS_ARCHIVE_DATABASE_PWD") ? getenv("DCS_ARCHIVE_DATABASE_PWD") : "");
 
 	// open db connections
 	char dcsArchiveDbConnInfo[1024];
 	sprintf(dcsArchiveDbConnInfo,
-			"dbname=%s host=%s port=%s  \
+	        "dbname=%s host=%s port=%s  \
 		user=%s password=%s",
-			dbname_,
-			dbhost_,
-			dbport_,
-			dbuser_,
-			dbpwd_);
+	        dbname_,
+	        dbhost_,
+	        dbport_,
+	        dbuser_,
+	        dbpwd_);
 
 	// dcs_archive Db Connection
 	dcsArchiveDbConn = PQconnectdb(dcsArchiveDbConnInfo);
@@ -1243,24 +1243,24 @@ void EpicsInterface::dbSystemLogin()
 
 	// dcs_alarm Db Connection
 	dbname_ = const_cast<char*>(
-		getenv("DCS_ALARM_DATABASE") ? getenv("DCS_ALARM_DATABASE") : "dcs_alarm");
+	    getenv("DCS_ALARM_DATABASE") ? getenv("DCS_ALARM_DATABASE") : "dcs_alarm");
 	dbhost_ = const_cast<char*>(
-		getenv("DCS_ALARM_DATABASE_HOST") ? getenv("DCS_ALARM_DATABASE_HOST") : "");
+	    getenv("DCS_ALARM_DATABASE_HOST") ? getenv("DCS_ALARM_DATABASE_HOST") : "");
 	dbport_ = const_cast<char*>(
-		getenv("DCS_ALARM_DATABASE_PORT") ? getenv("DCS_ALARM_DATABASE_PORT") : "");
+	    getenv("DCS_ALARM_DATABASE_PORT") ? getenv("DCS_ALARM_DATABASE_PORT") : "");
 	dbuser_ = const_cast<char*>(
-		getenv("DCS_ALARM_DATABASE_USER") ? getenv("DCS_ALARM_DATABASE_USER") : "");
+	    getenv("DCS_ALARM_DATABASE_USER") ? getenv("DCS_ALARM_DATABASE_USER") : "");
 	dbpwd_ = const_cast<char*>(
-		getenv("DCS_ALARM_DATABASE_PWD") ? getenv("DCS_ALARM_DATABASE_PWD") : "");
+	    getenv("DCS_ALARM_DATABASE_PWD") ? getenv("DCS_ALARM_DATABASE_PWD") : "");
 	char dcsAlarmDbConnInfo[1024];
 	sprintf(dcsAlarmDbConnInfo,
-			"dbname=%s host=%s port=%s  \
+	        "dbname=%s host=%s port=%s  \
 		user=%s password=%s",
-			dbname_,
-			dbhost_,
-			dbport_,
-			dbuser_,
-			dbpwd_);
+	        dbname_,
+	        dbhost_,
+	        dbport_,
+	        dbuser_,
+	        dbpwd_);
 
 	dcsAlarmDbConn = PQconnectdb(dcsAlarmDbConnInfo);
 
@@ -1278,24 +1278,24 @@ void EpicsInterface::dbSystemLogin()
 
 	// dcs_log Db Connection
 	dbname_ = const_cast<char*>(getenv("DCS_LOG_DATABASE") ? getenv("DCS_LOG_DATABASE")
-														   : "dcs_log");
+	                                                       : "dcs_log");
 	dbhost_ = const_cast<char*>(
-		getenv("DCS_LOG_DATABASE_HOST") ? getenv("DCS_LOG_DATABASE_HOST") : "");
+	    getenv("DCS_LOG_DATABASE_HOST") ? getenv("DCS_LOG_DATABASE_HOST") : "");
 	dbport_ = const_cast<char*>(
-		getenv("DCS_LOG_DATABASE_PORT") ? getenv("DCS_LOG_DATABASE_PORT") : "");
+	    getenv("DCS_LOG_DATABASE_PORT") ? getenv("DCS_LOG_DATABASE_PORT") : "");
 	dbuser_ = const_cast<char*>(
-		getenv("DCS_LOG_DATABASE_USER") ? getenv("DCS_LOG_DATABASE_USER") : "");
+	    getenv("DCS_LOG_DATABASE_USER") ? getenv("DCS_LOG_DATABASE_USER") : "");
 	dbpwd_ = const_cast<char*>(
-		getenv("DCS_LOG_DATABASE_PWD") ? getenv("DCS_LOG_DATABASE_PWD") : "");
+	    getenv("DCS_LOG_DATABASE_PWD") ? getenv("DCS_LOG_DATABASE_PWD") : "");
 	char dcsLogDbConnInfo[1024];
 	sprintf(dcsLogDbConnInfo,
-			"dbname=%s host=%s port=%s  \
+	        "dbname=%s host=%s port=%s  \
 		user=%s password=%s",
-			dbname_,
-			dbhost_,
-			dbport_,
-			dbuser_,
-			dbpwd_);
+	        dbname_,
+	        dbhost_,
+	        dbport_,
+	        dbuser_,
+	        dbpwd_);
 
 	dcsLogDbConn = PQconnectdb(dcsLogDbConnInfo);
 
@@ -1334,7 +1334,7 @@ void EpicsInterface::dbSystemLogout()
 
 //========================================================================================================================
 std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
-	const std::string& pvName, int startTime, int endTime)
+    const std::string& pvName, int startTime, int endTime)
 {
 	__GEN_COUT__ << "getChannelHistory() reached" << __E__;
 	std::vector<std::vector<std::string>> history;
@@ -1351,27 +1351,27 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 
 				// VIEW LAST 10 UPDATES
 				/*int num =*/snprintf(
-					buffer,
-					sizeof(buffer),
-					"SELECT FLOOR(EXTRACT(EPOCH FROM smpl_time)), float_val, "
-					"status.name, "
-					"severity.name, smpl_per FROM channel, sample, status, severity "
-					"WHERE "
-					"channel.channel_id = sample.channel_id AND sample.severity_id = "
-					"severity.severity_id  AND sample.status_id = status.status_id AND "
-					"channel.name = \'%s\' AND smpl_time >= TO_TIMESTAMP(\'%d\') AND "
-					"smpl_time < TO_TIMESTAMP(\'%d\') ORDER BY smpl_time desc",
-					pvName.c_str(),
-					startTime,
-					endTime);
+				    buffer,
+				    sizeof(buffer),
+				    "SELECT FLOOR(EXTRACT(EPOCH FROM smpl_time)), float_val, "
+				    "status.name, "
+				    "severity.name, smpl_per FROM channel, sample, status, severity "
+				    "WHERE "
+				    "channel.channel_id = sample.channel_id AND sample.severity_id = "
+				    "severity.severity_id  AND sample.status_id = status.status_id AND "
+				    "channel.name = \'%s\' AND smpl_time >= TO_TIMESTAMP(\'%d\') AND "
+				    "smpl_time < TO_TIMESTAMP(\'%d\') ORDER BY smpl_time desc",
+				    pvName.c_str(),
+				    startTime,
+				    endTime);
 
 				res = PQexec(dcsArchiveDbConn, buffer);
 
 				if(PQresultStatus(res) != PGRES_TUPLES_OK)
 				{
 					__SS__ << "getChannelHistory(): SELECT FROM ARCHIVER DATABASE "
-							  "FAILED!!! PQ ERROR: "
-						   << PQresultErrorMessage(res) << __E__;
+					          "FAILED!!! PQ ERROR: "
+					       << PQresultErrorMessage(res) << __E__;
 					PQclear(res);
 					__SS_THROW__;
 				}
@@ -1395,15 +1395,15 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 						row.append("\n");
 					}
 					__GEN_COUT__ << "getChannelHistory(): row from select: " << row
-								 << __E__;
+					             << __E__;
 					PQclear(res);
 				}
 			}
 			catch(...)
 			{
 				__SS__ << "getChannelHistory(): FAILING GETTING DATA FROM ARCHIVER "
-						  "DATABASE!!! PQ ERROR: "
-					   << PQresultErrorMessage(res) << __E__;
+				          "DATABASE!!! PQ ERROR: "
+				       << PQresultErrorMessage(res) << __E__;
 				try
 				{
 					throw;
@@ -1421,7 +1421,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 		else
 		{
 			__SS__ << "getChannelHistory(): ARCHIVER DATABASE CONNECTION FAILED!!! "
-				   << __E__;
+			       << __E__;
 			__SS_THROW__;
 		}
 	}
@@ -1430,7 +1430,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 		history.resize(1);
 		history[0] = {"PV Not Found", "NF", "N/a", "N/a"};
 		__GEN_COUT__ << "getChannelHistory() pvName " << pvName << " was not found!"
-					 << __E__;
+		             << __E__;
 		__GEN_COUT__ << "Trying to resubscribe to " << pvName << __E__;
 		subscribe(pvName);
 	}
@@ -1440,7 +1440,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 
 //========================================================================================================================
 std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
-	const std::string& pvName)
+    const std::string& pvName)
 {
 	__GEN_COUT__ << "EpicsInterface::getLastAlarms() reached" << __E__;
 	std::vector<std::vector<std::string>> alarms;
@@ -1455,8 +1455,8 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 
 			// ACTION FOR ALARM DB CHANNEL TABLE
 			/*int num =*/snprintf(buffer,
-								  sizeof(buffer),
-								  "SELECT   pv.component_id							\
+			                      sizeof(buffer),
+			                      "SELECT   pv.component_id							\
 								, alarm_tree.name							\
 								, pv.descr									\
 								, pv.pv_value								\
@@ -1476,17 +1476,17 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 						AND	pv.severity_id = severity.severity_id			\
 						AND	alarm_tree.name LIKE \'%%%s%%\'					\
 						ORDER BY pv.severity_id DESC;",
-								  pvName.c_str());
+			                      pvName.c_str());
 
 			res = PQexec(dcsAlarmDbConn, buffer);
 			__COUT__ << "getLastAlarms(): SELECT pv table PQntuples(res): "
-					 << PQntuples(res) << __E__;
+			         << PQntuples(res) << __E__;
 
 			if(PQresultStatus(res) != PGRES_TUPLES_OK)
 			{
 				__SS__
-					<< "getLastAlarms(): SELECT FROM ALARM DATABASE FAILED!!! PQ ERROR: "
-					<< PQresultErrorMessage(res) << __E__;
+				    << "getLastAlarms(): SELECT FROM ALARM DATABASE FAILED!!! PQ ERROR: "
+				    << PQresultErrorMessage(res) << __E__;
 				PQclear(res);
 				__SS_THROW__;
 			}
@@ -1515,20 +1515,20 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 			{
 				alarms.resize(1);
 				alarms[0] = {
-					"0",
-					"Alarms List Not Found",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
+				    "0",
+				    "Alarms List Not Found",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
 				};
 			}
 
@@ -1537,8 +1537,8 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 		catch(...)
 		{
 			__SS__ << "getLastAlarms(): FAILING GETTING DATA FROM ARCHIVER DATABASE!!! "
-					  "PQ ERROR: "
-				   << PQresultErrorMessage(res) << __E__;
+			          "PQ ERROR: "
+			       << PQresultErrorMessage(res) << __E__;
 			try
 			{
 				throw;
@@ -1563,7 +1563,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 
 //========================================================================================================================
 std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
-	const std::string& pvName)
+    const std::string& pvName)
 {
 	__GEN_COUT__ << "EpicsInterface::getAlarmsLog() reached" << __E__;
 	std::vector<std::vector<std::string>> alarmsHistory;
@@ -1578,9 +1578,9 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
 
 			// ACTION FOR ALARM DB CHANNEL TABLE
 			/*int num = */ snprintf(
-				buffer,
-				sizeof(buffer),
-				"SELECT DISTINCT												\
+			    buffer,
+			    sizeof(buffer),
+			    "SELECT DISTINCT												\
 							  message.id												\
 							, message.name												\
 							, message_content.value										\
@@ -1595,17 +1595,17 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
 						AND	message.datum >= current_date -20							\
 						AND	message.name LIKE '%%%s%%'									\
 						ORDER BY message.datum DESC;",
-				pvName.c_str());
+			    pvName.c_str());
 
 			res = PQexec(dcsLogDbConn, buffer);
 			__COUT__ << "getAlarmsLog(): SELECT message table PQntuples(res): "
-					 << PQntuples(res) << __E__;
+			         << PQntuples(res) << __E__;
 
 			if(PQresultStatus(res) != PGRES_TUPLES_OK)
 			{
 				__SS__ << "getAlarmsLog(): SELECT FROM ALARM LOG DATABASE FAILED!!! PQ "
-						  "ERROR: "
-					   << PQresultErrorMessage(res) << __E__;
+				          "ERROR: "
+				       << PQresultErrorMessage(res) << __E__;
 				PQclear(res);
 				__SS_THROW__;
 			}
@@ -1634,12 +1634,12 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
 			{
 				alarmsHistory.resize(1);
 				alarmsHistory[0] = {
-					"0",
-					"Alarms List Not Found",
-					"N/a",
-					"N/a",
-					"N/a",
-					"N/a",
+				    "0",
+				    "Alarms List Not Found",
+				    "N/a",
+				    "N/a",
+				    "N/a",
+				    "N/a",
 				};
 			}
 
@@ -1648,8 +1648,8 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
 		catch(...)
 		{
 			__SS__ << "getAlarmsLog(): FAILING GETTING DATA FROM ARCHIVER DATABASE!!! PQ "
-					  "ERROR: "
-				   << PQresultErrorMessage(res) << __E__;
+			          "ERROR: "
+			       << PQresultErrorMessage(res) << __E__;
 			try
 			{
 				throw;
@@ -1680,7 +1680,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getAlarmsLog(
 ///	Note: Archiver also has "NONE" and "OK" but should not be a current
 /// value
 std::vector<std::string> EpicsInterface::checkAlarm(const std::string& pvName,
-													bool ignoreMinor /*=false*/)
+                                                    bool ignoreMinor /*=false*/)
 {
 	__COUT__ << "checkAlarm()" << __E__;
 
@@ -1688,7 +1688,7 @@ std::vector<std::string> EpicsInterface::checkAlarm(const std::string& pvName,
 	if(pvIt == mapOfPVInfo_.end())
 	{
 		__SS__ << "While checking for alarm status, PV name '" << pvName
-			   << "' was not found in PV list!" << __E__;
+		       << "' was not found in PV list!" << __E__;
 		__SS_THROW__;
 	}
 
@@ -1717,7 +1717,7 @@ std::vector<std::vector<std::string>> EpicsInterface::checkAlarmNotifications()
 	std::vector<std::vector<std::string>> alarmReturn;
 	std::vector<std::string>              alarmRow;
 	auto                                  linkToAlarmsToNotify =
-		getSelfNode().getNode("LinkToAlarmAlertNotificationsTable");
+	    getSelfNode().getNode("LinkToAlarmAlertNotificationsTable");
 
 	if(!linkToAlarmsToNotify.isDisconnected())
 	{
@@ -1726,36 +1726,36 @@ std::vector<std::vector<std::string>> EpicsInterface::checkAlarmNotifications()
 		for(const auto& alarmsToNotifyGroup : alarmsToNotifyGroups)
 		{
 			__COUT__ << "checkAlarmNotifications() alarmsToNotifyGroup: "
-					 << alarmsToNotifyGroup.first << __E__;
+			         << alarmsToNotifyGroup.first << __E__;
 
 			auto alarmsToNotify =
-				alarmsToNotifyGroup.second.getNode("LinkToAlarmsToMonitorTable");
+			    alarmsToNotifyGroup.second.getNode("LinkToAlarmsToMonitorTable");
 			if(!alarmsToNotify.isDisconnected())
 			{
 				for(const auto& alarmToNotify : alarmsToNotify.getChildren())
 				{
 					__COUT__ << "checkAlarmNotifications() alarmToNotify: "
-							 << alarmToNotify.first << __E__;
+					         << alarmToNotify.first << __E__;
 
 					try
 					{
 						alarmRow =
-							checkAlarm(alarmToNotify.second.getNode("AlarmChannelName")
-										   .getValue<std::string>(),
-									   alarmToNotify.second.getNode("IgnoreMinorSeverity")
-										   .getValue<bool>());
+						    checkAlarm(alarmToNotify.second.getNode("AlarmChannelName")
+						                   .getValue<std::string>(),
+						               alarmToNotify.second.getNode("IgnoreMinorSeverity")
+						                   .getValue<bool>());
 					}
 					catch(const std::exception& e)
 					{
 						__COUT__ << "checkAlarmNotifications() alarmToNotify: "
-								 << alarmToNotify.first << " not in PVs List!!!" << __E__;
+						         << alarmToNotify.first << " not in PVs List!!!" << __E__;
 						continue;
 					}
 					alarmRow.push_back(alarmToNotify.first);
 					alarmRow.push_back(alarmsToNotifyGroup.second.getNode("WhoToNotify")
-										   .getValue<std::string>());
+					                       .getValue<std::string>());
 					alarmRow.push_back(alarmsToNotifyGroup.second.getNode("DoSendEmail")
-										   .getValue<std::string>());
+					                       .getValue<std::string>());
 					alarmRow.push_back(alarmsToNotifyGroup.first);
 					alarmReturn.push_back(alarmRow);
 				}
@@ -1777,7 +1777,7 @@ std::vector<std::vector<std::string>> EpicsInterface::checkAlarmNotifications()
 //========================================================================================================================
 /// handle Alarms For FSM from Epics
 void EpicsInterface::handleAlarmsForFSM(const std::string& fsmTransitionName,
-										ConfigurationTree  linkToAlarmsToMonitor)
+                                        ConfigurationTree  linkToAlarmsToMonitor)
 {
 	if(!linkToAlarmsToMonitor.isDisconnected())
 	{
@@ -1795,8 +1795,8 @@ void EpicsInterface::handleAlarmsForFSM(const std::string& fsmTransitionName,
 		for(const auto& alarmToMonitor : alarmsToMonitor)
 		{
 			std::vector<std::string> alarmReturn = checkAlarm(
-				alarmToMonitor.second.getNode("AlarmChannelName").getValue<std::string>(),
-				alarmToMonitor.second.getNode("IgnoreMinorSeverity").getValue<bool>());
+			    alarmToMonitor.second.getNode("AlarmChannelName").getValue<std::string>(),
+			    alarmToMonitor.second.getNode("IgnoreMinorSeverity").getValue<bool>());
 
 			if(alarmReturn.size())
 			{
@@ -1824,7 +1824,7 @@ void EpicsInterface::handleAlarmsForFSM(const std::string& fsmTransitionName,
 void EpicsInterface::configure()
 {
 	handleAlarmsForFSM("configure",
-					   getSelfNode().getNode("LinkToConfigureAlarmsToMonitorTable"));
+	                   getSelfNode().getNode("LinkToConfigureAlarmsToMonitorTable"));
 
 	__COUT__ << "configure(): Preparing EPICS for PVs..." << __E__;
 
@@ -1835,15 +1835,15 @@ void EpicsInterface::configure()
 	//  4. mark 'dirty' for EPICS cronjob restart or archiver and
 
 	std::string
-		slowControlsChannelsSourceTablesString =  // "DTCInterfaceTable,CFOInterfaceTable"
-		getSelfNode()
-			.getNode("SlowControlsChannelSourceTableList")
-			.getValueWithDefault<std::string>("");
+	    slowControlsChannelsSourceTablesString =  // "DTCInterfaceTable,CFOInterfaceTable"
+	    getSelfNode()
+	        .getNode("SlowControlsChannelSourceTableList")
+	        .getValueWithDefault<std::string>("");
 
 	__COUTV__(slowControlsChannelsSourceTablesString);
 
 	std::vector<std::string> slowControlsChannelsSourceTables =
-		StringMacros::getVectorFromString(slowControlsChannelsSourceTablesString);
+	    StringMacros::getVectorFromString(slowControlsChannelsSourceTablesString);
 	__COUTV__(StringMacros::vectorToString(slowControlsChannelsSourceTables));
 
 	for(const auto& slowControlsChannelsSourceTable : slowControlsChannelsSourceTables)
@@ -1851,8 +1851,8 @@ void EpicsInterface::configure()
 		__COUTV__(slowControlsChannelsSourceTable);
 
 		const SlowControlsTableBase* slowControlsTable =
-			getConfigurationManager()->getTable<SlowControlsTableBase>(
-				slowControlsChannelsSourceTable);
+		    getConfigurationManager()->getTable<SlowControlsTableBase>(
+		        slowControlsChannelsSourceTable);
 
 		if(slowControlsTable->slowControlsChannelListHasChanged())
 		{
@@ -1885,7 +1885,7 @@ void EpicsInterface::configure()
 				{
 					mapOfPVInfo_[pvName] = new PVInfo(DBR_STRING);
 					__COUT__ << "configure(): new PV '" << pvName
-							 << "' found! Now subscribing" << __E__;
+					         << "' found! Now subscribing" << __E__;
 					subscribe(pvName);
 				}
 
@@ -1897,20 +1897,20 @@ void EpicsInterface::configure()
 					{
 						// ACTION FOR DB ARCHIVER CHANNEL TABLE
 						snprintf(buffer,
-								 sizeof(buffer),
-								 "SELECT name FROM channel WHERE name = '%s';",
-								 pvName.c_str());
+						         sizeof(buffer),
+						         "SELECT name FROM channel WHERE name = '%s';",
+						         pvName.c_str());
 
 						res = PQexec(dcsArchiveDbConn, buffer);
 						__COUT__ << "configure(): SELECT channel table PQntuples(res): "
-								 << PQntuples(res) << __E__;
+						         << PQntuples(res) << __E__;
 
 						if(PQresultStatus(res) != PGRES_TUPLES_OK)
 						{
 							__SS__ << "configure(): SELECT FOR DATABASE CHANNEL TABLE "
-									  "FAILED!!! PV Name: "
-								   << pvName << " PQ ERROR: " << PQresultErrorMessage(res)
-								   << __E__;
+							          "FAILED!!! PV Name: "
+							       << pvName << " PQ ERROR: " << PQresultErrorMessage(res)
+							       << __E__;
 							PQclear(res);
 							__SS_THROW__;
 						}
@@ -1920,11 +1920,11 @@ void EpicsInterface::configure()
 							// UPDATE DB ARCHIVER CHANNEL TABLE
 							PQclear(res);
 							__COUT__ << "configure(): Updating PV: " << pvName
-									 << " in the Archiver Database channel table"
-									 << __E__;
+							         << " in the Archiver Database channel table"
+							         << __E__;
 							snprintf(buffer,
-									 sizeof(buffer),
-									 "UPDATE channel SET					\
+							         sizeof(buffer),
+							         "UPDATE channel SET					\
 															  grp_id=%d			\
 															, smpl_mode_id=%d	\
 															, smpl_val=%f		\
@@ -1932,13 +1932,13 @@ void EpicsInterface::configure()
 															, retent_id=%d		\
 															, retent_val=%f		\
 											WHERE name = '%s';",
-									 grp_id,
-									 smpl_mode_id,
-									 smpl_val,
-									 smpl_per,
-									 retent_id,
-									 retent_val,
-									 pvName.c_str());
+							         grp_id,
+							         smpl_mode_id,
+							         smpl_val,
+							         smpl_per,
+							         retent_id,
+							         retent_val,
+							         pvName.c_str());
 							//__COUT__ << "configure(): channel update select: " << buffer << __E__;
 
 							res = PQexec(dcsArchiveDbConn, buffer);
@@ -1946,10 +1946,10 @@ void EpicsInterface::configure()
 							if(PQresultStatus(res) != PGRES_COMMAND_OK)
 							{
 								__SS__ << "configure(): CHANNEL UPDATE INTO DATABASE "
-										  "CHANNEL TABLE FAILED!!! PV Name: "
-									   << pvName
-									   << " PQ ERROR: " << PQresultErrorMessage(res)
-									   << __E__;
+								          "CHANNEL TABLE FAILED!!! PV Name: "
+								       << pvName
+								       << " PQ ERROR: " << PQresultErrorMessage(res)
+								       << __E__;
 								PQclear(res);
 								__SS_THROW__;
 							}
@@ -1960,11 +1960,11 @@ void EpicsInterface::configure()
 							// INSERT INTO DB ARCHIVER CHANNEL TABLE
 							PQclear(res);
 							__COUT__ << "configure(): Writing new PV in the Archiver "
-										"Database channel table"
-									 << __E__;
+							            "Database channel table"
+							         << __E__;
 							snprintf(buffer,
-									 sizeof(buffer),
-									 "INSERT INTO channel(					\
+							         sizeof(buffer),
+							         "INSERT INTO channel(					\
 												  name				\
 												, descr				\
 												, grp_id			\
@@ -1974,23 +1974,23 @@ void EpicsInterface::configure()
 												, retent_id			\
 												, retent_val)		\
 							VALUES ('%s', '%s', %d, %d, %f, %f, %d, %f);",
-									 pvName.c_str(),
-									 descr.c_str(),
-									 grp_id,
-									 smpl_mode_id,
-									 smpl_val,
-									 smpl_per,
-									 retent_id,
-									 retent_val);
+							         pvName.c_str(),
+							         descr.c_str(),
+							         grp_id,
+							         smpl_mode_id,
+							         smpl_val,
+							         smpl_per,
+							         retent_id,
+							         retent_val);
 
 							res = PQexec(dcsArchiveDbConn, buffer);
 							if(PQresultStatus(res) != PGRES_COMMAND_OK)
 							{
 								__SS__ << "configure(): CHANNEL INSERT INTO DATABASE "
-										  "CHANNEL TABLE FAILED!!! PV Name: "
-									   << pvName
-									   << " PQ ERROR: " << PQresultErrorMessage(res)
-									   << __E__;
+								          "CHANNEL TABLE FAILED!!! PV Name: "
+								       << pvName
+								       << " PQ ERROR: " << PQresultErrorMessage(res)
+								       << __E__;
 								PQclear(res);
 								__SS_THROW__;
 							}
@@ -1999,23 +1999,23 @@ void EpicsInterface::configure()
 
 						// ACTION FOR DB ARCHIVER NUM_METADATA TABLE
 						snprintf(buffer,
-								 sizeof(buffer),
-								 "SELECT channel.channel_id FROM channel, num_metadata "
-								 "WHERE channel.channel_id = num_metadata.channel_id AND "
-								 "channel.name = '%s';",
-								 pvName.c_str());
+						         sizeof(buffer),
+						         "SELECT channel.channel_id FROM channel, num_metadata "
+						         "WHERE channel.channel_id = num_metadata.channel_id AND "
+						         "channel.name = '%s';",
+						         pvName.c_str());
 
 						res = PQexec(dcsArchiveDbConn, buffer);
 						__COUT__
-							<< "configure(): SELECT num_metadata table PQntuples(res): "
-							<< PQntuples(res) << __E__;
+						    << "configure(): SELECT num_metadata table PQntuples(res): "
+						    << PQntuples(res) << __E__;
 
 						if(PQresultStatus(res) != PGRES_TUPLES_OK)
 						{
 							__SS__ << "configure(): SELECT FOR DATABASE NUM_METADATA "
-									  "TABLE FAILED!!! PV Name: "
-								   << pvName << " PQ ERROR: " << PQresultErrorMessage(res)
-								   << __E__;
+							          "TABLE FAILED!!! PV Name: "
+							       << pvName << " PQ ERROR: " << PQresultErrorMessage(res)
+							       << __E__;
 							PQclear(res);
 							__SS_THROW__;
 						}
@@ -2025,13 +2025,13 @@ void EpicsInterface::configure()
 							// UPDATE DB ARCHIVER NUM_METADATA TABLE
 							std::string channel_id = PQgetvalue(res, 0, 0);
 							__COUT__ << "configure(): Updating PV: " << pvName
-									 << " channel_id: " << channel_id
-									 << " in the Archiver Database num_metadata table"
-									 << __E__;
+							         << " channel_id: " << channel_id
+							         << " in the Archiver Database num_metadata table"
+							         << __E__;
 							PQclear(res);
 							snprintf(buffer,
-									 sizeof(buffer),
-									 "UPDATE num_metadata SET					\
+							         sizeof(buffer),
+							         "UPDATE num_metadata SET					\
 												  low_disp_rng=%f		\
 												, high_disp_rng=%f		\
 												, low_warn_lmt=%f		\
@@ -2041,25 +2041,25 @@ void EpicsInterface::configure()
 												, prec=%d				\
 												, unit='%s'				\
 							WHERE channel_id='%s';",
-									 low_disp_rng,
-									 high_disp_rng,
-									 low_warn_lmt,
-									 high_warn_lmt,
-									 low_alarm_lmt,
-									 high_alarm_lmt,
-									 prec,
-									 unit.c_str(),
-									 channel_id.c_str());
+							         low_disp_rng,
+							         high_disp_rng,
+							         low_warn_lmt,
+							         high_warn_lmt,
+							         low_alarm_lmt,
+							         high_alarm_lmt,
+							         prec,
+							         unit.c_str(),
+							         channel_id.c_str());
 
 							res = PQexec(dcsArchiveDbConn, buffer);
 							if(PQresultStatus(res) != PGRES_COMMAND_OK)
 							{
 								__SS__ << "configure(): CHANNEL UPDATE INTO DATABASE "
-										  "NUM_METADATA TABLE FAILED!!! PV "
-										  "Name(channel_id): "
-									   << pvName << " " << channel_id
-									   << " PQ ERROR: " << PQresultErrorMessage(res)
-									   << __E__;
+								          "NUM_METADATA TABLE FAILED!!! PV "
+								          "Name(channel_id): "
+								       << pvName << " " << channel_id
+								       << " PQ ERROR: " << PQresultErrorMessage(res)
+								       << __E__;
 								PQclear(res);
 								__SS_THROW__;
 							}
@@ -2069,23 +2069,23 @@ void EpicsInterface::configure()
 						{
 							// INSERT INTO DB ARCHIVER NUM_METADATA TABLE
 							snprintf(buffer,
-									 sizeof(buffer),
-									 "SELECT channel_id FROM channel WHERE name = '%s';",
-									 pvName.c_str());
+							         sizeof(buffer),
+							         "SELECT channel_id FROM channel WHERE name = '%s';",
+							         pvName.c_str());
 
 							res = PQexec(dcsArchiveDbConn, buffer);
 							__COUT__
-								<< "configure(): SELECT channel table to check "
-								   "channel_id for num_metadata table. PQntuples(res): "
-								<< PQntuples(res) << __E__;
+							    << "configure(): SELECT channel table to check "
+							       "channel_id for num_metadata table. PQntuples(res): "
+							    << PQntuples(res) << __E__;
 
 							if(PQresultStatus(res) != PGRES_TUPLES_OK)
 							{
 								__SS__ << "configure(): SELECT TO DATABASE CHANNEL TABLE "
-										  "FOR NUM_MATADATA TABLE FAILED!!! PV Name: "
-									   << pvName
-									   << " PQ ERROR: " << PQresultErrorMessage(res)
-									   << __E__;
+								          "FOR NUM_MATADATA TABLE FAILED!!! PV Name: "
+								       << pvName
+								       << " PQ ERROR: " << PQresultErrorMessage(res)
+								       << __E__;
 								PQclear(res);
 								__SS_THROW__;
 							}
@@ -2094,13 +2094,13 @@ void EpicsInterface::configure()
 							{
 								std::string channel_id = PQgetvalue(res, 0, 0);
 								__COUT__ << "configure(): Writing new PV in the Archiver "
-											"Database num_metadata table"
-										 << __E__;
+								            "Database num_metadata table"
+								         << __E__;
 								PQclear(res);
 
 								snprintf(buffer,
-										 sizeof(buffer),
-										 "INSERT INTO num_metadata(			\
+								         sizeof(buffer),
+								         "INSERT INTO num_metadata(			\
 												  channel_id		\
 												, low_disp_rng		\
 												, high_disp_rng		\
@@ -2111,24 +2111,24 @@ void EpicsInterface::configure()
 												, prec				\
 												, unit)				\
 												VALUES ('%s',%f,%f,%f,%f,%f,%f,%d,'%s');",
-										 channel_id.c_str(),
-										 low_disp_rng,
-										 high_disp_rng,
-										 low_warn_lmt,
-										 high_warn_lmt,
-										 low_alarm_lmt,
-										 high_alarm_lmt,
-										 prec,
-										 unit.c_str());
+								         channel_id.c_str(),
+								         low_disp_rng,
+								         high_disp_rng,
+								         low_warn_lmt,
+								         high_warn_lmt,
+								         low_alarm_lmt,
+								         high_alarm_lmt,
+								         prec,
+								         unit.c_str());
 
 								res = PQexec(dcsArchiveDbConn, buffer);
 								if(PQresultStatus(res) != PGRES_COMMAND_OK)
 								{
 									__SS__ << "configure(): CHANNEL INSERT INTO DATABASE "
-											  "NUM_METADATA TABLE FAILED!!! PV Name: "
-										   << pvName
-										   << " PQ ERROR: " << PQresultErrorMessage(res)
-										   << __E__;
+									          "NUM_METADATA TABLE FAILED!!! PV Name: "
+									       << pvName
+									       << " PQ ERROR: " << PQresultErrorMessage(res)
+									       << __E__;
 									PQclear(res);
 									__SS_THROW__;
 								}
@@ -2137,9 +2137,9 @@ void EpicsInterface::configure()
 							else
 							{
 								__SS__ << "configure(): CHANNEL INSERT INTO DATABASE "
-										  "NUM_METADATA TABLE FAILED!!! PV Name: "
-									   << pvName << " NOT RECOGNIZED IN CHANNEL TABLE"
-									   << __E__;
+								          "NUM_METADATA TABLE FAILED!!! PV Name: "
+								       << pvName << " NOT RECOGNIZED IN CHANNEL TABLE"
+								       << __E__;
 								PQclear(res);
 								__SS_THROW__;
 							}
@@ -2148,8 +2148,8 @@ void EpicsInterface::configure()
 					catch(...)
 					{
 						__SS__ << "configure(): CHANNEL INSERT OR UPDATE INTO DATABASE "
-								  "FAILED!!! "
-							   << " PQ ERROR: " << PQresultErrorMessage(res) << __E__;
+						          "FAILED!!! "
+						       << " PQ ERROR: " << PQresultErrorMessage(res) << __E__;
 						try
 						{
 							throw;
@@ -2168,8 +2168,8 @@ void EpicsInterface::configure()
 				{
 					// RAR 21-Dec-2022: remove exception throwing for cases when db connection not expected
 					__COUT_INFO__ << "configure(): Archiver Database connection does not "
-									 "exist, so skipping channel update."
-								  << __E__;
+					                 "exist, so skipping channel update."
+					              << __E__;
 					// __SS_THROW__;
 					break;
 				}
