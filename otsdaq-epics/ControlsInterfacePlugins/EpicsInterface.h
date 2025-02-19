@@ -82,10 +82,10 @@ struct PVInfo
 	int                  circularBufferSize    = 10;  ///< Default Guess
 	unsigned int         mostRecentBufferIndex = -1;
 	std::vector<std::pair<time_t, std::string>>
-	     dataCache;           ///< (10, std::pair<time_t, std::string> (0, ""));
+		 dataCache;           ///< (10, std::pair<time_t, std::string> (0, ""));
 	bool valueChange = true;  ///< so that it automatically reports the status when
-	                          ///< we open the viewer for the first time - get to see
-	                          ///< what is DC'd
+							  ///< we open the viewer for the first time - get to see
+							  ///< what is DC'd
 	std::queue<PVAlerts> alerts;
 	//struct dbr_ctrl_char settings;
 	struct dbr_ctrl_double settings;
@@ -104,13 +104,13 @@ class EpicsInterface : public SlowControlsVInterface
 {
   public:
 	EpicsInterface(
-	    const std::string&       pluginType,
-	    const std::string&       interfaceUID,
-	    const ConfigurationTree& theXDAQContextConfigTree,
-	    const std::string&       controlsConfigurationPath);
+		const std::string&       pluginType,
+		const std::string&       interfaceUID,
+		const ConfigurationTree& theXDAQContextConfigTree,
+		const std::string&       controlsConfigurationPath);
 	~EpicsInterface();
-	
-	static const std::string 				EPICS_NO_ALARM;	
+
+	static const std::string 				EPICS_NO_ALARM;
 	static const std::string 				EPICS_INVALID_ALARM;
 	static const std::string 				EPICS_MINOR_ALARM;
 	static const std::string 				EPICS_MAJOR_ALARM;
