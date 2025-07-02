@@ -1349,18 +1349,32 @@ std::vector<std::vector<std::string>> EpicsInterface::getChannelHistory(
 				char        buffer[1024];
 				std::string row;
 
+				std::string select = 
+					"SELECT FLOOR(EXTRACT(EPOCH FROM smpl_time)), float_val, "
+				    "status.name, severity.name, smpl_per "
+					"FROM channel, sample, status, severity "
+				    "WHERE "
+				    "channel.channel_id = sample.channel_id "
+					"AND sample.severity_id = severity.severity_id "
+					"AND sample.status_id = status.status_id "
+				    "AND channel.name = \'%s\' "
+					"AND float_val IS NOT NULL "
+					"AND smpl_time >= TO_TIMESTAMP(\'%d\') "
+				    "AND smpl_time < TO_TIMESTAMP(\'%d\') ";
+				if(endTime - startTime < 432000)
+					select += "ORDER BY smpl_time desc";
+				else if((endTime - startTime > 432000) && (endTime - startTime <= 864000))
+					select += "AND EXTRACT(MINUTE FROM smpl_time) % 10 = 0 ORDER BY smpl_time desc";
+				else if((endTime - startTime > 864000) && (endTime - startTime <= 1296000))
+					select += "AND EXTRACT(MINUTE FROM smpl_time) % 15 = 0 ORDER BY smpl_time desc";
+				else if(endTime - startTime > 1296000)
+					select += "AND EXTRACT(MINUTE FROM smpl_time) % 60 = 0 ORDER BY smpl_time desc";
+
 				// VIEW LAST 10 UPDATES
 				/*int num =*/snprintf(
 				    buffer,
 				    sizeof(buffer),
-				    "SELECT FLOOR(EXTRACT(EPOCH FROM smpl_time)), float_val, "
-				    "status.name, "
-				    "severity.name, smpl_per FROM channel, sample, status, severity "
-				    "WHERE "
-				    "channel.channel_id = sample.channel_id AND sample.severity_id = "
-				    "severity.severity_id  AND sample.status_id = status.status_id AND "
-				    "channel.name = \'%s\' AND smpl_time >= TO_TIMESTAMP(\'%d\') AND "
-				    "smpl_time < TO_TIMESTAMP(\'%d\') ORDER BY smpl_time desc",
+					select.c_str(),
 				    pvName.c_str(),
 				    startTime,
 				    endTime);
@@ -1456,7 +1470,7 @@ std::vector<std::vector<std::string>> EpicsInterface::getLastAlarms(
 			// ACTION FOR ALARM DB CHANNEL TABLE
 			/*int num =*/snprintf(buffer,
 			                      sizeof(buffer),
-			                      "SELECT   pv.component_id							\
+			                      "SELECT   pv.component_id					\
 								, alarm_tree.name							\
 								, pv.descr									\
 								, pv.pv_value								\
