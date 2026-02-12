@@ -20,3 +20,4 @@ setupARTDAQOTS
 *.vcxproj*
 spack-build-*
 build-linux-*
+_codeql_*
