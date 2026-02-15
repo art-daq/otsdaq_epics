@@ -26,7 +26,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 cet_cmake_module_directories(Modules BINARY)
 
 cet_set_compiler_flags(
- DIAGS 
+ DIAGS
  VIGILANT
  WERROR
  NO_UNDEFINED
@@ -63,7 +63,7 @@ if(BTYPE_UC STREQUAL DEBUG)
 		add_link_options(--coverage)
 	endif()
 endif()
- 
+
 #cet_report_compiler_flags()
 
 find_package(otsdaq 2.06.06 REQUIRED)
@@ -74,7 +74,7 @@ find_package(EPICS 7.0.6.1 REQUIRED)
  include_directories($ENV{XDAQ_ROOT}/include/linux $ENV{XDAQ_ROOT}/include)
 link_directories($ENV{XDAQ_ROOT}/lib)
 link_directories($ENV{ARTDAQ_DATABASE_LIB})
- set(XDAQ_BASIC_LIB_LIST 
+ set(XDAQ_BASIC_LIB_LIST
    xcept
    xoap
    xdaq
