@@ -70,20 +70,6 @@ find_package(otsdaq 2.06.06 REQUIRED)
 find_package(PostgreSQL 13.2 REQUIRED)
 find_package(EPICS 7.0.6.1 REQUIRED)
 
- # XDAQ Extra setup
- include_directories($ENV{XDAQ_ROOT}/include/linux $ENV{XDAQ_ROOT}/include)
-link_directories($ENV{XDAQ_ROOT}/lib)
-link_directories($ENV{ARTDAQ_DATABASE_LIB})
- set(XDAQ_BASIC_LIB_LIST
-   xcept
-   xoap
-   xdaq
-   toolbox
-   xerces-c
-   cgicc
- )
- set(XDAQ_XERCES-C xerces-c)
-
 # Code
 add_subdirectory(otsdaq-epics)
 
